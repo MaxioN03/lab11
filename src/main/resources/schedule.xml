@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schedules>
+    <bus>
+        <number>1</number>
+        <departure-date>10-04-2017</departure-date>
+        <departure-time>14.30</departure-time>
+        <departure-station>Минск АВ</departure-station>
+        <departure-platform>8</departure-platform>
+        <arrival-station>Новогрудок АВ</arrival-station>
+        <cost>4</cost>
+        <mark>ВАЗ</mark>
+        <time>3:50</time>
+    </bus>
+    <bus>
+        <number>2</number>
+        <departure-date>10-04-2017</departure-date>
+        <departure-time>17.30</departure-time>
+        <departure-station>Минск АВ</departure-station>
+        <departure-platform>9</departure-platform>
+        <arrival-station>Малорита АВ</arrival-station>
+        <cost>6</cost>
+        <mark>ВАЗ</mark>
+        <time>4:20</time>
+    </bus>
+
+    <train>
+        <number>228</number>
+        <departure-date>10-04-2017</departure-date>
+        <departure-time>17.30</departure-time>
+        <departure-station>Минск ЖД</departure-station>
+        <departure-platform>9</departure-platform>
+        <arrival-station>Орша ЖД</arrival-station>
+        <arrival-time>11:20</arrival-time>
+        <arrival-date>11-04-2017</arrival-date>
+        <cost>16</cost>
+        <ticket>Купэ</ticket>
+    </train>
+</schedules>  
