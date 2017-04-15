@@ -6,6 +6,7 @@ import com.bsuir.entity.Train;
 import com.bsuir.entity.Vehicle;
 import com.bsuir.resourceFactory.Resource;
 import com.bsuir.resourceFactory.ResourceFactory;
+import com.bsuir.search.StationSeeker;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -22,7 +23,6 @@ public class MainFrame extends JDialog {
 
     private JPanel contentPane;
     private JButton buttonOK;
-    private JButton buttonCancel;
     private JRadioButton XMLRadioButton;
     private JRadioButton CSVRadioButton;
     private JRadioButton BusRadioButton;
@@ -32,22 +32,37 @@ public class MainFrame extends JDialog {
     private JTable table1;
     private JTable table2;
     private JTabbedPane tabbedPane1;
+    private JRadioButton ArrRadioButton;
+    private JRadioButton DepRadioButton;
+    private JTextField SearchField1;
+    private JButton SearchButton;
+    private JTable MarkedBusTable;
+    private JTable MarkedTrainTable;
+    private JButton AddToMarkedButton;
+    private JButton удалитьИзОтмеченныхButton;
+    private JButton удалитьАвтобусButton;
     DefaultTableModel model1 = (DefaultTableModel) table1.getModel();
     DefaultTableModel model2 = (DefaultTableModel) table2.getModel();
+    DefaultTableModel MarkedBusModel = (DefaultTableModel) MarkedBusTable.getModel();
+    DefaultTableModel MarkedTrainModel = (DefaultTableModel) MarkedTrainTable.getModel();
+
     private final String[] columnsBus = {"Номер", "Дата отпр.", "Время отпр.", "Станиця отпр.", "Платформа", "Станция пр.", "Цена",
             "Марка", "Время в пути"};
     private final String[] columnsTrain = {"Номер", "Дата отпр.", "Время отпр.", "Станиця отпр.", "Платформа", "Станция пр.",
             "Дата пр.", "Время пр.", "Цена", "Тип билета"};
 
     public MainFrame() {
+        DepRadioButton.setSelected(true);
         resource = factory.getResource("XML");
         type = "BUS";
 
         for (String column : columnsBus) {
             model1.addColumn(column);
+            MarkedBusModel.addColumn(column);
         }
         for (String column : columnsTrain) {
             model2.addColumn(column);
+            MarkedTrainModel.addColumn(column);
         }
 
         setContentPane(contentPane);
@@ -80,53 +95,23 @@ public class MainFrame extends JDialog {
             public void mouseClicked(MouseEvent e) {
                 list = resource.getResource(type);
 
-                Vector<String> vector = new Vector<String>();
-
                 switch (type) {
                     case "BUS":
-                        int rowCount = model1.getRowCount();
-                        for (int i = rowCount - 1; i >= 0; i--) {
-                            model1.removeRow(i);
-                        }
+                        tabbedPane1.setSelectedIndex(0);
+
+                        Util.clearTable(model1);
 
                         List<Bus> listBus = (List<Bus>) list;
 
-                        for (Bus bus : listBus) {
-                            vector = new Vector<String>();
-                            vector.add(String.valueOf(bus.getNumber()));
-                            vector.add(bus.getDepDate());
-                            vector.add(bus.getDepTime());
-                            vector.add(bus.getDepStation());
-                            vector.add(String.valueOf(bus.getDepPlatform()));
-                            vector.add(bus.getArrStation());
-                            vector.add(String.valueOf(bus.getCost()));
-                            vector.add(bus.getMark());
-                            vector.add(bus.getTime());
-                            model1.addRow(vector);
-                        }
+                        Util.setBusListAtTable(model1, listBus);
                         break;
                     case "TRAIN":
-                        rowCount = model2.getRowCount();
-                        for (int i = rowCount - 1; i >= 0; i--) {
-                            model2.removeRow(i);
-                        }
+                        tabbedPane1.setSelectedIndex(1);
+
+                        Util.clearTable(model2);
 
                         List<Train> listTrain = (List<Train>) list;
-
-                        for (Train train : listTrain) {
-                            vector = new Vector<String>();
-                            vector.add(String.valueOf(train.getNumber()));
-                            vector.add(train.getDepDate());
-                            vector.add(train.getDepTime());
-                            vector.add(train.getDepStation());
-                            vector.add(String.valueOf(train.getDepPlatform()));
-                            vector.add(train.getArrStation());
-                            vector.add(train.getArrDate());
-                            vector.add(train.getArrTime());
-                            vector.add(String.valueOf(train.getCost()));
-                            vector.add(train.getTypeTicket());
-                            model2.addRow(vector);
-                        }
+                        Util.setTrainListAtTable(model2, listTrain);
                         break;
                 }
             }
@@ -154,6 +139,79 @@ public class MainFrame extends JDialog {
             @Override
             public void mouseClicked(MouseEvent e) {
                 type = "TRAIN";
+            }
+        });
+        SearchButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                list = resource.getResource(type);
+
+                switch (type) {
+                    case "BUS":
+                        tabbedPane1.setSelectedIndex(0);
+                        Util.clearTable(model1);
+                        List<Bus> listBus = (List<Bus>) list;
+
+                        if (DepRadioButton.isSelected()) {
+                            Util.setBusListAtTable(model1, StationSeeker.searchBusByDepStation(listBus, SearchField1.getText()));
+                        } else {
+                            Util.setBusListAtTable(model1, StationSeeker.searchBusByArrStation(listBus, SearchField1.getText()));
+                        }
+                        break;
+                    case "TRAIN":
+                        tabbedPane1.setSelectedIndex(1);
+                        Util.clearTable(model2);
+                        List<Train> listTrain = (List<Train>) list;
+
+                        if (DepRadioButton.isSelected()) {
+                            Util.setTrainListAtTable(model2, StationSeeker.searchTrainByDepStation(listTrain, SearchField1.getText()));
+                        } else {
+                            Util.setTrainListAtTable(model2, StationSeeker.searchTrainByArrStation(listTrain, SearchField1.getText()));
+                        }
+                        break;
+                }
+
+            }
+        });
+        AddToMarkedButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                Vector<String> vector = new Vector<String>();
+
+                if (tabbedPane1.getSelectedIndex() == 0) {
+                    int selected = table1.getSelectedRow();
+                    int rowCount = model1.getColumnCount();
+
+                    for (int i = 0; i <= rowCount - 1; i++) {
+                        vector.add(String.valueOf(table1.getValueAt(selected, i)));
+                    }
+                    MarkedBusModel.addRow(vector);
+                } else if (tabbedPane1.getSelectedIndex() == 1) {
+                    int selected = table2.getSelectedRow();
+                    int rowCount = model2.getColumnCount();
+
+                    for (int i = 0; i <= rowCount - 1; i++) {
+                        vector.add(String.valueOf(table2.getValueAt(selected, i)));
+                    }
+                    MarkedTrainModel.addRow(vector);
+                }
+
+            }
+        });
+        удалитьИзОтмеченныхButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selected2 = MarkedTrainTable.getSelectedRow();
+                MarkedTrainModel.removeRow(selected2);
+
+
+            }
+        });
+        удалитьАвтобусButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int selected1 = MarkedBusTable.getSelectedRow();
+                MarkedBusModel.removeRow(selected1);
             }
         });
     }
