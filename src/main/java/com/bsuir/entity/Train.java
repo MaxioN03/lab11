@@ -3,7 +3,7 @@ package com.bsuir.entity;
 /**
  * Created by Егор on 10.04.17.
  */
-public class Train {
+public class Train extends Vehicle{
     private int number;
     private String depDate;
     private String depTime;

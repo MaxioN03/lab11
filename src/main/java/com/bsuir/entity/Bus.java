@@ -3,7 +3,7 @@ package com.bsuir.entity;
 /**
  * Created by Егор on 10.04.17.
  */
-public class Bus {
+public class Bus extends Vehicle{
     private int number;
     private String depDate;
     private String depTime;
